@@ -245,6 +245,10 @@ function menuTentukanTim(&$state) {
         
         $opsi = getInput("1. Lanjutkan masukkan, 2. Selesai mendaftar: ");
         if ($opsi == 2) break;
+        
+        // Clear screen setelah input untuk menjaga privacy pemilihan tim
+        clearScreen();
+        echo colorText("Menu 2: Tentukan Tim\n", 'green');
     }
     
     // Penyeimbangan otomatis untuk anggota yang fleksibel
