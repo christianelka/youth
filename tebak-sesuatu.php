@@ -29,9 +29,56 @@ function colorText($text, $color) {
         'magenta' => "\033[35m",
         'cyan' => "\033[36m",
         'white' => "\033[37m",
+        'bright_red' => "\033[91m",
+        'bright_green' => "\033[92m",
+        'bright_yellow' => "\033[93m",
+        'bright_blue' => "\033[94m",
+        'bright_magenta' => "\033[95m",
+        'bright_cyan' => "\033[96m",
+        'bright_white' => "\033[97m",
+        'bold' => "\033[1m",
+        'underline' => "\033[4m",
+        'bg_red' => "\033[41m",
+        'bg_green' => "\033[42m",
+        'bg_yellow' => "\033[43m",
+        'bg_blue' => "\033[44m",
+        'bg_magenta' => "\033[45m",
+        'bg_cyan' => "\033[46m",
         'reset' => "\033[0m"
     ];
     return $colors[$color] . $text . $colors['reset'];
+}
+
+// Fungsi styling khusus
+function headerText($text) {
+    $border = str_repeat("═", strlen($text) + 4);
+    return colorText("╔$border╗\n", 'bright_cyan') .
+           colorText("║ ", 'bright_cyan') . colorText($text, 'bold') . colorText(" ║\n", 'bright_cyan') .
+           colorText("╚$border╝\n", 'bright_cyan');
+}
+
+function successMessage($text) {
+    return "✅ " . colorText($text, 'bright_green');
+}
+
+function errorMessage($text) {
+    return "❌ " . colorText($text, 'bright_red');
+}
+
+function warningMessage($text) {
+    return "⚠️  " . colorText($text, 'bright_yellow');
+}
+
+function infoMessage($text) {
+    return "ℹ️  " . colorText($text, 'bright_blue');
+}
+
+function menuItem($number, $text, $icon = "📋") {
+    return colorText("$number.", 'bright_cyan') . " $icon " . colorText($text, 'white');
+}
+
+function scoreDisplay($tim, $skor) {
+    return "🏆 " . colorText($tim, 'bright_yellow') . ": " . colorText($skor . " poin", 'bright_green');
 }
 
 // Fuzzy matching untuk tebakan
@@ -54,41 +101,49 @@ $state = [
 // Fungsi Menu 1: Tentukan Ketua
 function menuTentukanKetua(&$state) {
     clearScreen();
-    echo colorText("Menu 1: Tentukan Ketua\n", 'green');
+    echo headerText("👑 PEMILIHAN KETUA TIM");
+    echo "\n";
     
     $votes = [];
     while (true) {
-        $nama = getInput("Masukkan nama calon ketua: ");
+        $nama = getInput("👤 " . colorText("Masukkan nama calon ketua: ", 'bright_cyan'));
         if (!isset($votes[$nama])) {
             $votes[$nama] = 0;
         }
         $votes[$nama]++;
         
-        $opsi = getInput("1. Lanjutkan masukkan, 2. Selesai memasukkan: ");
+        echo successMessage("Suara untuk '$nama' berhasil dicatat!") . "\n";
+        $opsi = getInput("📝 " . colorText("1. Lanjutkan masukkan, 2. Selesai memasukkan: ", 'bright_yellow'));
         if ($opsi == 2) break;
         
         // Clear screen setelah input untuk menjaga privacy voting
         clearScreen();
-        echo colorText("Menu 1: Tentukan Ketua\n", 'green');
+        echo headerText("👑 PEMILIHAN KETUA TIM");
+        echo "\n";
     }
     
     // Summary votes
     arsort($votes);
     $calon_list = array_keys($votes);
-    echo "Summary calon ketua:\n";
+    echo "\n" . colorText("📊 HASIL PEMILIHAN KETUA:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("─", 40), 'cyan') . "\n";
     foreach ($calon_list as $i => $nama) {
-        echo ($i+1) . ". $nama (" . $votes[$nama] . " vote)\n";
+        $medal = ($i == 0) ? "🥇" : (($i == 1) ? "🥈" : (($i == 2) ? "🥉" : "🏅"));
+        echo "$medal " . colorText(($i+1) . ".", 'bright_cyan') . " " . colorText($nama, 'bright_white') . " (" . colorText($votes[$nama] . " vote", 'bright_green') . ")\n";
     }
+    echo colorText(str_repeat("─", 40), 'cyan') . "\n\n";
     
-    $state['jumlah_tim'] = (int)getInput("Ingin membuat berapa tim? (min 2): ");
+    $state['jumlah_tim'] = (int)getInput("🎯 " . colorText("Ingin membuat berapa tim? (min 2): ", 'bright_cyan'));
     if ($state['jumlah_tim'] < 2 || $state['jumlah_tim'] > count($calon_list)) {
-        echo colorText("Invalid jumlah tim!\n", 'red');
+        echo errorMessage("Jumlah tim tidak valid! Harus antara 2 dan " . count($calon_list)) . "\n";
+        getInput("⏎ " . colorText("Tekan Enter untuk kembali...", 'white'));
         return;
     }
     
-    $pilihan = explode(',', getInput("Pilih ketua (angka urutan, pisah koma, sebanyak jumlah tim): "));
+    $pilihan = explode(',', getInput("🎯 " . colorText("Pilih ketua (angka urutan, pisah koma, sebanyak " . $state['jumlah_tim'] . " tim): ", 'bright_cyan')));
     if (count($pilihan) != $state['jumlah_tim']) {
-        echo colorText("Jumlah pilihan tidak sesuai!\n", 'red');
+        echo errorMessage("Jumlah pilihan tidak sesuai! Harus memilih " . $state['jumlah_tim'] . " ketua.") . "\n";
+        getInput("⏎ " . colorText("Tekan Enter untuk kembali...", 'white'));
         return;
     }
     
@@ -109,12 +164,15 @@ function menuTentukanKetua(&$state) {
         $state['skor'][$tim_key] = 0;
     }
     
-    echo "Permainan dengan " . $state['jumlah_tim'] . " tim. Ketua:\n";
+    echo "\n" . successMessage("Tim berhasil dibuat!") . "\n\n";
+    echo colorText("🎯 PEMBAGIAN TIM:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("═", 35), 'bright_cyan') . "\n";
     foreach ($state['tim'] as $tim_key => $data) {
-        echo "$tim_key - " . $data['ketua'] . "\n";
+        echo "👑 " . colorText($tim_key, 'bright_yellow') . " - " . colorText($data['ketua'], 'bright_white') . "\n";
     }
+    echo colorText(str_repeat("═", 35), 'bright_cyan') . "\n";
     
-    getInput("Tekan 0 untuk kembali: ");
+    getInput("\n⏎ " . colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Fungsi untuk menyeimbangkan tim
@@ -173,27 +231,29 @@ function balanceTeams(&$state, $anggota_fleksibel) {
         }
     }
     
-    echo colorText("Tim telah diseimbangkan otomatis!\n", 'yellow');
+    echo successMessage("Tim telah diseimbangkan otomatis untuk keadilan!") . "\n";
 }
 
 // Fungsi Menu 2: Tentukan Tim
 function menuTentukanTim(&$state) {
     if ($state['jumlah_tim'] == 0) {
-        echo colorText("Tentukan ketua dulu!\n", 'red');
-        getInput("Tekan enter...");
+        clearScreen();
+        echo errorMessage("Tentukan ketua tim terlebih dahulu!") . "\n";
+        getInput("⏎ " . colorText("Tekan Enter untuk kembali...", 'white'));
         return;
     }
     
     clearScreen();
-    echo colorText("Menu 2: Tentukan Tim\n", 'green');
+    echo headerText("👥 PENDAFTARAN ANGGOTA TIM");
+    echo "\n";
     
     $ketua_list = array_values(array_column($state['tim'], 'ketua'));
     $anggota_fleksibel = []; // Track anggota yang melihat label diacak (bisa dipindah)
     
     while (true) {
-        $nama = getInput("Masukkan nama Anda (non-ketua): ");
+        $nama = getInput("👤 " . colorText("Masukkan nama Anda (bukan ketua): ", 'bright_cyan'));
         if (in_array($nama, $ketua_list)) {
-            echo colorText("Nama ini adalah ketua!\n", 'red');
+            echo errorMessage("Nama '$nama' sudah terdaftar sebagai ketua tim!") . "\n";
             continue;
         }
         
@@ -206,18 +266,22 @@ function menuTentukanTim(&$state) {
             for ($i = 0; $i < count($display_list); $i++) {
                 $labels[] = "Kelompok " . chr(65 + $i); // A, B, C...
             }
+            echo warningMessage("Label tim diacak untuk keadilan pemilihan") . "\n";
         } else {
             $labels = $display_list;
+            echo infoMessage("Menampilkan nama ketua tim") . "\n";
         }
         
-        echo "Pilih tim:\n";
+        echo "\n" . colorText("🎯 PILIH TIM ANDA:", 'bright_magenta') . "\n";
+        echo colorText(str_repeat("─", 25), 'cyan') . "\n";
         foreach ($labels as $i => $label) {
-            echo ($i+1) . ". $label\n";
+            echo colorText(($i+1) . ".", 'bright_cyan') . " 🏷️  " . colorText($label, 'bright_white') . "\n";
         }
+        echo colorText(str_repeat("─", 25), 'cyan') . "\n";
         
-        $pilihan = (int)getInput("Pilih (angka): ");
+        $pilihan = (int)getInput("🎯 " . colorText("Pilih nomor tim: ", 'bright_cyan'));
         if ($pilihan < 1 || $pilihan > count($display_list)) {
-            echo colorText("Invalid!\n", 'red');
+            echo errorMessage("Pilihan tidak valid! Pilih angka 1-" . count($display_list)) . "\n";
             continue;
         }
         
@@ -233,36 +297,47 @@ function menuTentukanTim(&$state) {
                 if (!$is_normal) {
                     $anggota_fleksibel[] = $nama;
                 }
+                echo successMessage("'$nama' berhasil bergabung dengan tim!") . "\n";
                 $found = true;
                 break;
             }
         }
         
         if (!$found) {
-            echo colorText("Error: Tim tidak ditemukan!\n", 'red');
+            echo errorMessage("Tim tidak ditemukan! Silakan coba lagi.") . "\n";
             continue;
         }
         
-        $opsi = getInput("1. Lanjutkan masukkan, 2. Selesai mendaftar: ");
+        $opsi = getInput("📝 " . colorText("1. Lanjutkan masukkan, 2. Selesai mendaftar: ", 'bright_yellow'));
         if ($opsi == 2) break;
         
         // Clear screen setelah input untuk menjaga privacy pemilihan tim
         clearScreen();
-        echo colorText("Menu 2: Tentukan Tim\n", 'green');
+        echo headerText("👥 PENDAFTARAN ANGGOTA TIM");
+        echo "\n";
     }
     
     // Penyeimbangan otomatis untuk anggota yang fleksibel
     if (count($anggota_fleksibel) > 0) {
+        echo "\n" . infoMessage("Melakukan penyeimbangan tim...") . "\n";
         balanceTeams($state, $anggota_fleksibel);
     }
     
     // Summary tim
-    echo "Summary Kelompok:\n";
+    echo "\n" . colorText("📋 SUSUNAN FINAL TIM:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("═", 50), 'bright_cyan') . "\n";
     foreach ($state['tim'] as $tim_key => $data) {
-        echo "$tim_key (Ketua: " . $data['ketua'] . "): Anggota - " . implode(', ', $data['anggota']) . "\n";
+        echo "🏆 " . colorText($tim_key, 'bright_yellow') . " (Ketua: " . colorText($data['ketua'], 'bright_white') . ")\n";
+        if (!empty($data['anggota'])) {
+            echo "   👥 Anggota: " . colorText(implode(', ', $data['anggota']), 'white') . "\n";
+        } else {
+            echo "   👥 Anggota: " . colorText("Belum ada", 'yellow') . "\n";
+        }
+        echo "\n";
     }
+    echo colorText(str_repeat("═", 50), 'bright_cyan') . "\n";
     
-    getInput("Tekan 0 untuk kembali: ");
+    getInput("⏎ " . colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Fungsi Menu 3: Mulai Bermain
@@ -414,49 +489,85 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
 // Fungsi Menu 4: Skor Akhir
 function menuSkorAkhir($state) {
     clearScreen();
-    echo colorText("Menu 4: Skor Akhir\n", 'green');
+    echo headerText("🏆 HASIL AKHIR PERMAINAN");
+    echo "\n";
     
-    arsort($state['skor']);
-    foreach ($state['skor'] as $tim_key => $skor) {
-        echo "$tim_key: $skor poin\n";
+    // Sort skor dari tertinggi ke terendah
+    $sorted_skor = $state['skor'];
+    arsort($sorted_skor);
+    
+    echo colorText("🎉 PAPAN SKOR FINAL:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("═", 50), 'bright_cyan') . "\n";
+    
+    $position = 1;
+    foreach ($sorted_skor as $tim_key => $skor) {
+        $medal = ($position == 1) ? "🥇" : (($position == 2) ? "🥈" : (($position == 3) ? "🥉" : "🏅"));
+        echo "$medal " . colorText("#$position", 'bright_cyan') . " " . scoreDisplay($tim_key, $skor) . "\n";
+        $position++;
     }
     
-    $pemenang = key($state['skor']);
-    echo "Pemenang: $pemenang!\n";
+    echo colorText(str_repeat("═", 50), 'bright_cyan') . "\n";
     
-    echo "Riwayat Sesuatu:\n";
-    foreach ($state['sesuatu_riwayat'] as $riw) {
-        $status = $riw['benar'] ? 'Benar' : 'Salah';
-        echo "- $riw[tim]: $riw[sesuatu] ($status)\n";
+    $pemenang = key($sorted_skor);
+    $skor_tertinggi = current($sorted_skor);
+    echo "\n" . colorText("🎊 SELAMAT! 🎊", 'bright_yellow') . "\n";
+    echo "👑 " . colorText("PEMENANG: $pemenang", 'bold') . " dengan " . colorText("$skor_tertinggi poin!", 'bright_green') . "\n\n";
+    
+    if (!empty($state['sesuatu_riwayat'])) {
+        echo colorText("📜 RIWAYAT PERMAINAN:", 'bright_magenta') . "\n";
+        echo colorText(str_repeat("─", 45), 'cyan') . "\n";
+        foreach ($state['sesuatu_riwayat'] as $riw) {
+            $status_icon = $riw['benar'] ? "✅" : "❌";
+            $status_text = $riw['benar'] ? colorText("BENAR", 'bright_green') : colorText("SALAH", 'bright_red');
+            echo "$status_icon " . colorText($riw['tim'], 'bright_cyan') . ": " . colorText($riw['sesuatu'], 'white') . " (" . $status_text . ")\n";
+        }
+        echo colorText(str_repeat("─", 45), 'cyan') . "\n";
     }
     
-    getInput("Tekan 0 untuk kembali: ");
+    getInput("\n⏎ " . colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Fungsi Menu 8: Skor Sementara
 function menuSkorSementara($state) {
     clearScreen();
-    echo colorText("Menu 8: Skor Sementara\n", 'green');
+    echo headerText("📊 SKOR SEMENTARA");
+    echo "\n";
     
-    foreach ($state['skor'] as $tim_key => $skor) {
-        echo "$tim_key: $skor poin\n";
+    // Sort skor dari tertinggi ke terendah
+    $sorted_skor = $state['skor'];
+    arsort($sorted_skor);
+    
+    echo colorText("🏆 PAPAN SKOR SEMENTARA:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("═", 40), 'bright_cyan') . "\n";
+    
+    $position = 1;
+    foreach ($sorted_skor as $tim_key => $skor) {
+        $medal = ($position == 1) ? "🥇" : (($position == 2) ? "🥈" : (($position == 3) ? "🥉" : "🏅"));
+        echo "$medal " . colorText("#$position", 'bright_cyan') . " " . scoreDisplay($tim_key, $skor) . "\n";
+        $position++;
     }
     
-    getInput("Tekan 0 untuk kembali: ");
+    echo colorText(str_repeat("═", 40), 'bright_cyan') . "\n";
+    
+    getInput("⏎ " . colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Fungsi Menu 9: Status Item
 function menuStatusItem($state, $daftar_sesuatu) {
     clearScreen();
-    echo colorText("Menu 9: Status Item\n", 'green');
+    echo headerText("📝 STATUS ITEM PERMAINAN");
+    echo "\n";
     
     $total_items = count($daftar_sesuatu);
     $used_items = count($state['sesuatu_digunakan']);
     $available_items = $total_items - $used_items;
     
-    echo "Total item: $total_items\n";
-    echo "Sudah digunakan: $used_items\n";
-    echo "Masih tersedia: $available_items\n\n";
+    echo colorText("📊 STATISTIK UMUM:", 'bright_magenta') . "\n";
+    echo colorText(str_repeat("═", 40), 'bright_cyan') . "\n";
+    echo "📦 " . colorText("Total item:", 'bright_yellow') . " " . colorText($total_items, 'bright_white') . "\n";
+    echo "✅ " . colorText("Sudah digunakan:", 'bright_yellow') . " " . colorText($used_items, 'bright_green') . "\n";
+    echo "⭐ " . colorText("Masih tersedia:", 'bright_yellow') . " " . colorText($available_items, 'bright_cyan') . "\n";
+    echo colorText(str_repeat("═", 40), 'bright_cyan') . "\n\n";
     
     // Hitung per kategori
     $tokoh_total = 0;
@@ -478,44 +589,56 @@ function menuStatusItem($state, $daftar_sesuatu) {
         }
     }
     
-    echo colorText("TOKOH PENTING:\n", 'blue');
-    echo "Total: $tokoh_total, Digunakan: $tokoh_used, Tersisa: " . ($tokoh_total - $tokoh_used) . "\n\n";
+    echo colorText("👤 KATEGORI TOKOH PENTING:", 'bright_blue') . "\n";
+    echo colorText(str_repeat("─", 35), 'cyan') . "\n";
+    echo "📦 Total: " . colorText($tokoh_total, 'bright_white') . " | ✅ Digunakan: " . colorText($tokoh_used, 'bright_green') . " | ⭐ Tersisa: " . colorText(($tokoh_total - $tokoh_used), 'bright_cyan') . "\n\n";
     
-    echo colorText("KEJADIAN BESAR:\n", 'yellow');
-    echo "Total: $kejadian_total, Digunakan: $kejadian_used, Tersisa: " . ($kejadian_total - $kejadian_used) . "\n\n";
+    echo colorText("📅 KATEGORI KEJADIAN BESAR:", 'bright_yellow') . "\n";
+    echo colorText(str_repeat("─", 35), 'cyan') . "\n";
+    echo "📦 Total: " . colorText($kejadian_total, 'bright_white') . " | ✅ Digunakan: " . colorText($kejadian_used, 'bright_green') . " | ⭐ Tersisa: " . colorText(($kejadian_total - $kejadian_used), 'bright_cyan') . "\n\n";
     
     if (!empty($state['sesuatu_digunakan'])) {
-        echo colorText("Item yang sudah digunakan:\n", 'red');
-        foreach ($state['sesuatu_digunakan'] as $used) {
-            echo "- $used\n";
+        echo colorText("🗂️ ITEM YANG SUDAH DIGUNAKAN:", 'bright_red') . "\n";
+        echo colorText(str_repeat("─", 40), 'cyan') . "\n";
+        foreach ($state['sesuatu_digunakan'] as $i => $used) {
+            echo colorText(($i+1) . ".", 'bright_cyan') . " " . colorText($used, 'white') . "\n";
         }
+        echo colorText(str_repeat("─", 40), 'cyan') . "\n";
+    } else {
+        echo infoMessage("Belum ada item yang digunakan.") . "\n";
     }
     
-    getInput("Tekan 0 untuk kembali: ");
+    getInput("\n⏎ " . colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Halaman Utama
 while (true) {
     clearScreen();
-    echo colorText("Permainan Youth - Tebak Alkitab Bersama!\n", 'green');
+    echo headerText("🎮 PERMAINAN YOUTH - TEBAK ALKITAB BERSAMA! 🎮");
+    echo "\n";
     
     if ($state['jumlah_tim'] > 0) {
-        echo "Permainan dengan " . $state['jumlah_tim'] . " tim. Ketua: " . implode(', ', $state['ketua_terpilih']) . "\n";
-        echo "Tim: ";
+        echo infoMessage("Permainan dengan " . $state['jumlah_tim'] . " tim aktif") . "\n";
+        echo "👑 " . colorText("Ketua Tim:", 'bright_yellow') . " " . colorText(implode(', ', $state['ketua_terpilih']), 'bright_white') . "\n";
+        echo "👥 " . colorText("Tim:", 'bright_yellow') . " ";
         foreach ($state['tim'] as $tim_key => $data) {
-            echo "$tim_key (" . $data['ketua'] . "), ";
+            echo colorText("$tim_key", 'bright_cyan') . colorText("(" . $data['ketua'] . ")", 'white') . " ";
         }
-        echo "\n";
+        echo "\n\n";
     }
     
-    echo "Menu:\n1. Tentukan Ketua\n2. Tentukan Tim\n3. Mulai Bermain\n4. Cek Skor Akhir\n";
+    echo colorText("📋 MENU UTAMA:\n", 'bright_magenta');
+    echo menuItem("1", "Tentukan Ketua", "👑") . "\n";
+    echo menuItem("2", "Tentukan Tim", "👥") . "\n"; 
+    echo menuItem("3", "Mulai Bermain", "🎯") . "\n";
+    echo menuItem("4", "Cek Skor Akhir", "🏆") . "\n";
     if (!empty($state['tim'])) {
-        echo "8. Skor Sementara\n";
+        echo menuItem("8", "Skor Sementara", "📊") . "\n";
     }
-    echo "9. Status Item\n";
-    echo "0. Keluar\n";
+    echo menuItem("9", "Status Item", "📝") . "\n";
+    echo menuItem("0", "Keluar", "🚪") . "\n\n";
     
-    $menu = getInput("Pilih menu: ");
+    $menu = getInput("🎯 " . colorText("Pilih menu: ", 'bright_cyan'));
     
     if ($menu == 1) menuTentukanKetua($state);
     elseif ($menu == 2) menuTentukanTim($state);
@@ -524,5 +647,5 @@ while (true) {
     elseif ($menu == 8 && !empty($state['tim'])) menuSkorSementara($state);
     elseif ($menu == 9) menuStatusItem($state, $daftar_sesuatu);
     elseif ($menu == 0) break;
-    else echo colorText("Menu invalid!\n", 'red');
+    else echo errorMessage("Menu tidak valid! Silakan pilih angka yang tersedia.") . "\n";
 }
