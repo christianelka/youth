@@ -66,6 +66,10 @@ function menuTentukanKetua(&$state) {
         
         $opsi = getInput("1. Lanjutkan masukkan, 2. Selesai memasukkan: ");
         if ($opsi == 2) break;
+        
+        // Clear screen setelah input untuk menjaga privacy voting
+        clearScreen();
+        echo colorText("Menu 1: Tentukan Ketua\n", 'green');
     }
     
     // Summary votes
