@@ -474,13 +474,61 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
                 $sisa_clue--;
             }
             
+            $rebut_berhasil = false; // Flag to track if a steal was successful
             if (!$benar) {
-                echo colorText("Clue habis. Jawaban: " . $sesuatu['nama'] . ". Skor: 0\n", 'red');
+                // Log kegagalan tim utama
+                $state['sesuatu_riwayat'][] = ['tim' => $tim_key, 'sesuatu' => $sesuatu['nama'], 'benar' => false];
+
+                // KESEMPATAN REBUT
+                echo "\n" . headerText("⚡️ KESEMPATAN REBUT ⚡️");
+                echo warningMessage("Tim $tim_key gagal menebak. Kesempatan terbuka untuk tim lain!") . "\n";
+                echo infoMessage("Jawaban yang benar akan mendapatkan 5 poin.") . "\n\n";
+
+                $other_teams = array_filter($tim_keys, function($t) use ($tim_key) {
+                    return $t !== $tim_key;
+                });
+
+                if (!empty($other_teams)) {
+                    shuffle($other_teams); // Acak urutan tim yang merebut
+
+                    foreach ($other_teams as $rebut_tim_key) {
+                        echo "Giliran merebut untuk " . colorText($rebut_tim_key, 'bright_yellow') . "!\n";
+                        $tebakan_rebut = getInput(colorText("Tebakan Anda: ", 'bright_cyan'));
+
+                        if (isCorrectGuess($tebakan_rebut, $sesuatu['nama'])) {
+                            $skor_rebut = 5;
+                            $state['skor'][$rebut_tim_key] += $skor_rebut;
+
+                            echo successMessage("BENAR! Tim $rebut_tim_key berhasil merebut $skor_rebut poin!");
+                            echo "\n" . infoMessage("Jawaban yang benar adalah: " . $sesuatu['nama']) . "\n";
+
+                            // Catat di riwayat sebagai 'rebut'
+                            $state['sesuatu_riwayat'][] = [
+                                'tim' => $rebut_tim_key,
+                                'sesuatu' => $sesuatu['nama'],
+                                'benar' => true,
+                                'rebut' => true // Flag baru
+                            ];
+
+                            $rebut_berhasil = true;
+                            break; // Hentikan kesempatan rebut jika sudah ada yang benar
+                        } else {
+                            echo errorMessage("Salah! Kesempatan untuk tim selanjutnya.") . "\n\n";
+                        }
+                    }
+                }
+
+                if (!$rebut_berhasil) {
+                    echo "\n" . errorMessage("Tidak ada tim yang berhasil menebak.");
+                    echo "\n" . infoMessage("Jawaban yang benar adalah: " . $sesuatu['nama']) . "\n";
+                }
+
+            } else {
+                // Jika tim utama berhasil menebak, catat kesuksesan mereka
+                $state['sesuatu_riwayat'][] = ['tim' => $tim_key, 'sesuatu' => $sesuatu['nama'], 'benar' => true];
             }
             
-            $state['sesuatu_riwayat'][] = ['tim' => $tim_key, 'sesuatu' => $sesuatu['nama'], 'benar' => $benar];
-            
-            $lanjut = getInput("1. Lanjut ke tim selanjutnya, 2. Akhiri permainan: ");
+            $lanjut = getInput("\n1. Lanjut ke tim selanjutnya, 2. Akhiri permainan: ");
             if ($lanjut == 2) return;
         }
     }
@@ -519,7 +567,8 @@ function menuSkorAkhir($state) {
         foreach ($state['sesuatu_riwayat'] as $riw) {
             $status_icon = $riw['benar'] ? "✅" : "❌";
             $status_text = $riw['benar'] ? colorText("BENAR", 'bright_green') : colorText("SALAH", 'bright_red');
-            echo "$status_icon " . colorText($riw['tim'], 'bright_cyan') . ": " . colorText($riw['sesuatu'], 'white') . " (" . $status_text . ")\n";
+            $rebut_text = isset($riw['rebut']) && $riw['rebut'] ? colorText(" (Rebut)", 'bright_yellow') : "";
+            echo "$status_icon " . colorText($riw['tim'], 'bright_cyan') . ": " . colorText($riw['sesuatu'], 'white') . " (" . $status_text . "$rebut_text)\n";
         }
         echo colorText(str_repeat("─", 45), 'cyan') . "\n";
     }
