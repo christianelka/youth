@@ -368,13 +368,22 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
             clearScreen();
             echo "Giliran $tim_key (Ketua: " . $state['tim'][$tim_key]['ketua'] . ")\n";
             
-            // Pilih penebak
+            // Pilih penebak secara acak
             $all_members = array_merge([$state['tim'][$tim_key]['ketua']], $state['tim'][$tim_key]['anggota']);
-            $penebak = getInput("Pilih penebak (nama): ");
-            if (!in_array($penebak, $all_members)) {
-                echo colorText("Invalid!\n", 'red');
+
+            // Filter anggota kosong jika ada, untuk menghindari error
+            $valid_members = array_filter($all_members);
+            if (empty($valid_members)) {
+                echo errorMessage("Tim ini tidak memiliki anggota untuk bisa menebak!");
+                getInput("\n" . colorText("Tekan Enter untuk melanjutkan...", 'white'));
                 continue;
             }
+
+            $penebak_key = array_rand($valid_members);
+            $penebak = $valid_members[$penebak_key];
+
+            echo "\n" . infoMessage("Penebak yang terpilih secara acak adalah: " . colorText($penebak, 'bright_white')) . "\n";
+            getInput(colorText("Tekan Enter untuk memulai...", 'white'));
             
             // Sistem pilihan acak - memberikan 2 opsi random untuk menghindari bias kategori
             if (count($sesuatu_tersedia) == 1) {
