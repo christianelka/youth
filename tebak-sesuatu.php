@@ -52,9 +52,9 @@ function colorText($text, $color) {
 // Fungsi styling khusus
 function headerText($text) {
     $border = str_repeat("═", strlen($text) + 4);
-    return colorText("╔$border╗\n", 'bright_cyan') .
+    return colorText("╔{$border}╗\n", 'bright_cyan') .
            colorText("║ ", 'bright_cyan') . colorText($text, 'bold') . colorText(" ║\n", 'bright_cyan') .
-           colorText("╚$border╝\n", 'bright_cyan');
+           colorText("╚{$border}╝\n", 'bright_cyan');
 }
 
 function successMessage($text) {
