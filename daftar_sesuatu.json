@@ -772,5 +772,221 @@
             "Murid-murid jatuh tersungkur takut."
         ],
         "clue_pembantu": "Kemuliaan ilahi yang tersingkap."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Zakheus",
+        "clue_teks": [
+            "Dia adalah seorang pemungut cukai yang kaya raya.",
+            "Dia bertubuh pendek.",
+            "Dia memanjat pohon ara untuk melihat Yesus.",
+            "Dia berjanji mengembalikan empat kali lipat."
+        ],
+        "clue_gerakan": [
+            "Memanjat pohon.",
+            "Melihat ke bawah dari atas.",
+            "Menghitung uang.",
+            "Membuka pintu rumah untuk tamu.",
+            "Memberikan harta kepada orang miskin."
+        ],
+        "clue_pembantu": "Pemungut cukai yang naik pohon."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Maria Magdalena",
+        "clue_teks": [
+            "Dia adalah salah satu wanita pertama yang melihat kubur kosong.",
+            "Yesus mengusir tujuh roh jahat darinya.",
+            "Dia menangis di dekat kubur Yesus.",
+            "Dia adalah murid setia Yesus."
+        ],
+        "clue_gerakan": [
+            "Mengurapi kaki dengan minyak wangi.",
+            "Menangis tersedu-sedu.",
+            "Berlari untuk memberi kabar.",
+            "Melihat ke dalam kubur yang kosong.",
+            "Berlutut di depan seseorang."
+        ],
+        "clue_pembantu": "Saksi pertama kebangkitan."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Tomas",
+        "clue_teks": [
+            "Dia meragukan kebangkitan Yesus.",
+            "Dia berkata ingin mencucukkan jarinya ke bekas luka.",
+            "Dia akhirnya mengaku 'Ya Tuhanku dan Allahku!'.",
+            "Dia adalah salah satu dari dua belas murid."
+        ],
+        "clue_gerakan": [
+            "Menunjukkan jari telunjuk.",
+            "Menyentuh telapak tangan orang lain.",
+            "Menggelengkan kepala tidak percaya.",
+            "Berlutut dengan takjub.",
+            "Menyatakan pengakuan dengan lantang."
+        ],
+        "clue_pembantu": "Murid yang ragu-ragu."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Barnabas",
+        "clue_teks": [
+            "Namanya berarti 'anak penghiburan'.",
+            "Dia menjual ladangnya untuk membantu jemaat.",
+            "Dia adalah teman seperjalanan Paulus.",
+            "Dia membela Markus untuk ikut dalam perjalanan misi."
+        ],
+        "clue_gerakan": [
+            "Memberikan sekantong uang.",
+            "Merangkul bahu teman.",
+            "Berdebat dengan seseorang.",
+            "Berjalan jauh bersama.",
+            "Mendorong seseorang untuk maju."
+        ],
+        "clue_pembantu": "Anak penghiburan yang murah hati."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Yesaya",
+        "clue_teks": [
+            "Dia adalah nabi yang menubuatkan kelahiran Mesias dari seorang perawan.",
+            "Dia melihat kemuliaan Tuhan di Bait Suci.",
+            "Bibirnya disentuh dengan bara api.",
+            "Dia menulis kitab yang sangat panjang."
+        ],
+        "clue_gerakan": [
+            "Menulis di gulungan kitab.",
+            "Melihat ke atas dengan takjub.",
+            "Menyentuh bibir dengan jari.",
+            "Berlutut di hadapan takhta.",
+            "Menunjuk pada bayi yang akan datang."
+        ],
+        "clue_pembantu": "Nabi yang melihat kemuliaan Tuhan."
+    },
+    {
+        "kategori": "kejadian",
+        "nama": "Perumpamaan Anak yang Hilang",
+        "clue_teks": [
+            "Seorang anak meminta warisannya lebih awal.",
+            "Dia menghabiskan semua uangnya dengan berfoya-foya.",
+            "Dia bekerja memberi makan babi.",
+            "Ayahnya menyambutnya kembali dengan pesta."
+        ],
+        "clue_gerakan": [
+            "Berlari memeluk seseorang.",
+            "Memberi makan babi.",
+            "Memakaikan cincin ke jari.",
+            "Menari di sebuah pesta.",
+            "Berjalan pulang dengan lesu."
+        ],
+        "clue_pembantu": "Kisah tentang pengampunan seorang ayah."
+    },
+    {
+        "kategori": "kejadian",
+        "nama": "Perumpamaan Orang Samaria yang Murah Hati",
+        "clue_teks": [
+            "Seorang pria dirampok dan dipukuli di jalan.",
+            "Seorang imam dan orang Lewi melewatinya.",
+            "Seorang dari bangsa yang dibenci menolongnya.",
+            "Dia membawa korban ke penginapan dan merawatnya."
+        ],
+        "clue_gerakan": [
+            "Berjalan melewati seseorang yang tergeletak.",
+            "Membalut luka seseorang.",
+            "Menuangkan minyak dan anggur.",
+            "Menaikkan orang ke atas keledai.",
+            "Memberi uang kepada pemilik penginapan."
+        ],
+        "clue_pembantu": "Kisah tentang siapa sesungguhnya sesama kita."
+    },
+    {
+        "kategori": "kejadian",
+        "nama": "Yesus Meredakan Angin Ribut",
+        "clue_teks": [
+            "Terjadi di atas perahu di danau.",
+            "Yesus sedang tidur saat badai datang.",
+            "Murid-murid ketakutan dan membangunkan-Nya.",
+            "Dia menghardik angin dan danau menjadi tenang."
+        ],
+        "clue_gerakan": [
+            "Tidur di dalam perahu yang bergoyang.",
+            "Mengguncang seseorang agar bangun.",
+            "Mengangkat tangan untuk menghentikan sesuatu.",
+            "Perahu terombang-ambing oleh ombak.",
+            "Menjadi tenang dan diam."
+        ],
+        "clue_pembantu": "Mukjizat di atas danau yang bergelora."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Kain dan Habel",
+        "clue_teks": [
+            "Dua bersaudara, anak-anak Adam dan Hawa.",
+            "Satu adalah petani, yang lain gembala.",
+            "Persembahan yang satu diterima, yang lain ditolak.",
+            "Terjadi pembunuhan pertama dalam sejarah."
+        ],
+        "clue_gerakan": [
+            "Memberikan hasil panen.",
+            "Memberikan seekor domba.",
+            "Memukul saudara sendiri.",
+            "Menutupi wajah karena marah.",
+            "Berbicara dengan Tuhan di ladang."
+        ],
+        "clue_pembantu": "Kisah cemburu dua saudara."
+    },
+    {
+        "kategori": "kejadian",
+        "nama": "Pemberian Manna di Padang Gurun",
+        "clue_teks": [
+            "Makanan yang turun dari langit untuk bangsa Israel.",
+            "Rasanya seperti kue madu.",
+            "Harus dikumpulkan setiap pagi.",
+            "Tidak boleh disimpan untuk hari berikutnya, kecuali hari Sabat."
+        ],
+        "clue_gerakan": [
+            "Memungut sesuatu dari tanah.",
+            "Melihat ke atas ke langit.",
+            "Mengumpulkan ke dalam bakul.",
+            "Memasak di atas api.",
+            "Beristirahat pada hari ketujuh."
+        ],
+        "clue_pembantu": "Roti dari surga."
+    },
+    {
+        "kategori": "tokoh",
+        "nama": "Yeremia",
+        "clue_teks": [
+            "Dikenal sebagai 'nabi yang meratap'.",
+            "Dia sering menangisi dosa bangsanya.",
+            "Dia dimasukkan ke dalam sumur berlumpur.",
+            "Dia dipanggil Tuhan sejak masih sangat muda."
+        ],
+        "clue_gerakan": [
+            "Menangis dengan sedih.",
+            "Menulis di gulungan kitab lalu membakarnya.",
+            "Diturunkan ke dalam lubang dengan tali.",
+            "Berbicara dengan sedih kepada orang banyak.",
+            "Menyampaikan pesan yang tidak mau didengar orang."
+        ],
+        "clue_pembantu": "Nabi peratap."
+    },
+    {
+        "kategori": "kejadian",
+        "nama": "Perjalanan ke Emaus",
+        "clue_teks": [
+            "Dua murid berjalan sambil berdiskusi setelah kebangkitan.",
+            "Seseorang yang tidak dikenal bergabung dengan mereka.",
+            "Orang itu menjelaskan kitab suci kepada mereka.",
+            "Mereka mengenali-Nya saat Dia memecahkan roti."
+        ],
+        "clue_gerakan": [
+            "Berjalan bersama di sebuah jalan.",
+            "Berbicara dengan sedih dan bingung.",
+            "Mendengarkan seseorang menjelaskan.",
+            "Duduk di meja makan.",
+            "Memecah roti dan memberikannya."
+        ],
+        "clue_pembantu": "Penampakan Yesus setelah bangkit kepada dua murid."
     }
 ]
