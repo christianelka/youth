@@ -95,7 +95,8 @@ $state = [
     'tim' => [],
     'skor' => [],
     'sesuatu_digunakan' => [],
-    'sesuatu_riwayat' => [] // Untuk skor akhir: ['tim' => 'X', 'sesuatu' => 'Nama', 'benar' => true/false]
+    'sesuatu_riwayat' => [], // Untuk skor akhir: ['tim' => 'X', 'sesuatu' => 'Nama', 'benar' => true/false]
+    'pencapaian' => []      // Untuk melacak bonus, e.g., ['tim1' => ['hattrick_count' => 0]]
 ];
 
 // Fungsi Menu 1: Tentukan Ketua
@@ -162,6 +163,7 @@ function menuTentukanKetua(&$state) {
         $tim_key = 'tim' . ($i+1);
         $state['tim'][$tim_key] = ['ketua' => $ketua_terpilih[$i], 'anggota' => []];
         $state['skor'][$tim_key] = 0;
+        $state['pencapaian'][$tim_key] = ['hattrick_count' => 0];
     }
     
     echo "\n" . successMessage("Tim berhasil dibuat!") . "\n\n";
@@ -467,8 +469,29 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
                     $tebakan = getInput("Tebakan: ");
                     if (isCorrectGuess($tebakan, $sesuatu['nama'])) {
                         $skor = 10 + ($sisa_clue * 2);
+                        $pesan_bonus = "";
+
+                        // Cek Bonus "Tebakan Sempurna"
+                        if ($sisa_clue == 10) {
+                            $skor += 5;
+                            $pesan_bonus .= warningMessage(" BONUS: Tebakan Sempurna! +5 Poin! ");
+                        }
+
+                        // Cek Bonus "Hattrick"
+                        $state['pencapaian'][$tim_key]['hattrick_count']++;
+                        if ($state['pencapaian'][$tim_key]['hattrick_count'] == 3) {
+                            $skor += 10;
+                            $pesan_bonus .= warningMessage(" BONUS: Hattrick! +10 Poin! ");
+                            $state['pencapaian'][$tim_key]['hattrick_count'] = 0; // Reset setelah dapat bonus
+                        }
+
                         $state['skor'][$tim_key] += $skor;
-                        echo colorText("Benar! Jawaban: " . $sesuatu['nama'] . ". Skor: $skor\n", 'green');
+                        echo successMessage("Benar! Jawaban: " . $sesuatu['nama'] . ". Total skor ronde ini: $skor");
+                        if (!empty($pesan_bonus)) {
+                            echo $pesan_bonus;
+                        }
+                        echo "\n";
+
                         $benar = true;
                         // Tampil semua clue
                         echo "Semua Clue:\n";
@@ -477,7 +500,13 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
                         }
                         break;
                     } else {
-                        echo colorText("Salah! Lanjut clue.\n", 'red');
+                        echo errorMessage("Salah! Lanjut clue.");
+                        // Reset Hattrick jika tebakan salah
+                        if ($state['pencapaian'][$tim_key]['hattrick_count'] > 0) {
+                            $state['pencapaian'][$tim_key]['hattrick_count'] = 0;
+                            echo warningMessage(" (Rangkaian Hattrick direset!)");
+                        }
+                        echo "\n";
                     }
                 }
                 $sisa_clue--;
@@ -485,12 +514,18 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
             
             $rebut_berhasil = false; // Flag to track if a steal was successful
             if (!$benar) {
+                // Reset hattrick untuk tim yang gagal karena kehabisan clue
+                if ($state['pencapaian'][$tim_key]['hattrick_count'] > 0) {
+                    $state['pencapaian'][$tim_key]['hattrick_count'] = 0;
+                    echo warningMessage("Tim $tim_key kehabisan clue. Rangkaian Hattrick direset!") . "\n";
+                }
+
                 // Log kegagalan tim utama
                 $state['sesuatu_riwayat'][] = ['tim' => $tim_key, 'sesuatu' => $sesuatu['nama'], 'benar' => false];
 
                 // KESEMPATAN REBUT
                 echo "\n" . headerText("⚡️ KESEMPATAN REBUT ⚡️");
-                echo warningMessage("Tim $tim_key gagal menebak. Kesempatan terbuka untuk tim lain!") . "\n";
+                echo warningMessage("Kesempatan terbuka untuk tim lain!") . "\n";
                 echo infoMessage("Jawaban yang benar akan mendapatkan 5 poin.") . "\n\n";
 
                 $other_teams = array_filter($tim_keys, function($t) use ($tim_key) {
@@ -498,7 +533,7 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
                 });
 
                 if (!empty($other_teams)) {
-                    shuffle($other_teams); // Acak urutan tim yang merebut
+                    shuffle($other_teams);
 
                     foreach ($other_teams as $rebut_tim_key) {
                         echo "Giliran merebut untuk " . colorText($rebut_tim_key, 'bright_yellow') . "!\n";
@@ -511,18 +546,24 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
                             echo successMessage("BENAR! Tim $rebut_tim_key berhasil merebut $skor_rebut poin!");
                             echo "\n" . infoMessage("Jawaban yang benar adalah: " . $sesuatu['nama']) . "\n";
 
-                            // Catat di riwayat sebagai 'rebut'
+                            // Tim yang merebut tidak mendapat bonus hattrick, dan streak mereka tidak bertambah
                             $state['sesuatu_riwayat'][] = [
                                 'tim' => $rebut_tim_key,
                                 'sesuatu' => $sesuatu['nama'],
                                 'benar' => true,
-                                'rebut' => true // Flag baru
+                                'rebut' => true
                             ];
 
                             $rebut_berhasil = true;
-                            break; // Hentikan kesempatan rebut jika sudah ada yang benar
+                            break;
                         } else {
-                            echo errorMessage("Salah! Kesempatan untuk tim selanjutnya.") . "\n\n";
+                            echo errorMessage("Salah! Kesempatan untuk tim selanjutnya.");
+                            // Reset hattrick untuk tim yang gagal merebut
+                            if ($state['pencapaian'][$rebut_tim_key]['hattrick_count'] > 0) {
+                                $state['pencapaian'][$rebut_tim_key]['hattrick_count'] = 0;
+                                echo warningMessage(" (Rangkaian Hattrick direset!)");
+                            }
+                            echo "\n\n";
                         }
                     }
                 }
@@ -541,6 +582,77 @@ function menuMulaiBermain(&$state, $daftar_sesuatu) {
             if ($lanjut == 2) return;
         }
     }
+}
+
+// Fungsi Menu 5: Ronde Cepat (Lightning Round)
+function menuLightningRound(&$state, $daftar_sesuatu) {
+    if (empty($state['tim'])) {
+        echo errorMessage("Tentukan tim dulu sebelum memulai Ronde Cepat!") . "\n";
+        getInput("Tekan enter...");
+        return;
+    }
+
+    clearScreen();
+    echo headerText("⚡️ RONDE CEPAT ⚡️");
+    echo warningMessage("Setiap tim akan mendapat 5 kata. Tebak sebanyak mungkin!") . "\n";
+    echo infoMessage("Setiap jawaban benar bernilai 5 poin. Tidak ada pengurangan poin.") . "\n\n";
+
+    $tim_keys = array_keys($state['tim']);
+    shuffle($tim_keys); // Acak urutan tim yang bermain
+
+    // Filter kata yang tersedia
+    $sesuatu_tersedia = array_values(array_filter($daftar_sesuatu, function($s) use ($state) {
+        return !in_array($s['nama'], $state['sesuatu_digunakan']);
+    }));
+
+    $kata_per_tim = 5;
+    if (count($sesuatu_tersedia) < count($tim_keys) * $kata_per_tim) {
+        echo errorMessage("Tidak cukup kata tersisa untuk Ronde Cepat!") . "\n";
+        getInput("Tekan enter...");
+        return;
+    }
+
+    shuffle($sesuatu_tersedia); // Acak kata yang akan digunakan
+
+    foreach ($tim_keys as $tim_key) {
+        clearScreen();
+        echo headerText("⚡️ GILIRAN: " . strtoupper($tim_key) . " ⚡️");
+        getInput(colorText("Tim " . $tim_key . ", bersiaplah! Tekan Enter untuk mulai...", 'bright_yellow'));
+
+        $kata_untuk_ronde = array_splice($sesuatu_tersedia, 0, $kata_per_tim);
+        $skor_ronde = 0;
+
+        foreach ($kata_untuk_ronde as $sesuatu) {
+            echo "\n" . colorText("Petunjuk: " . $sesuatu['clue_pembantu'], 'bright_cyan') . "\n";
+            $tebakan = getInput("Jawaban: ");
+
+            if (isCorrectGuess($tebakan, $sesuatu['nama'])) {
+                $skor_ronde += 5;
+                echo successMessage("BENAR! +5 Poin");
+            } else {
+                echo errorMessage("SALAH! Jawaban: " . $sesuatu['nama']);
+            }
+
+            // Tandai kata sudah digunakan dan catat di riwayat
+            $state['sesuatu_digunakan'][] = $sesuatu['nama'];
+            $state['sesuatu_riwayat'][] = [
+                'tim' => $tim_key,
+                'sesuatu' => $sesuatu['nama'],
+                'benar' => isCorrectGuess($tebakan, $sesuatu['nama']),
+                'ronde_cepat' => true
+            ];
+            echo "\n" . colorText(str_repeat("─", 40), 'cyan') . "\n";
+        }
+
+        $state['skor'][$tim_key] += $skor_ronde;
+        echo "\n" . successMessage("Ronde untuk $tim_key selesai! Total poin ronde ini: $skor_ronde");
+        getInput("\n" . colorText("Tekan Enter untuk lanjut ke tim berikutnya...", 'white'));
+    }
+
+    clearScreen();
+    echo headerText("🏁 RONDE CEPAT SELESAI 🏁");
+    echo infoMessage("Semua tim telah menyelesaikan gilirannya.") . "\n";
+    getInput(colorText("Tekan Enter untuk kembali ke menu utama...", 'white'));
 }
 
 // Fungsi Menu 4: Skor Akhir
@@ -577,7 +689,8 @@ function menuSkorAkhir($state) {
             $status_icon = $riw['benar'] ? "✅" : "❌";
             $status_text = $riw['benar'] ? colorText("BENAR", 'bright_green') : colorText("SALAH", 'bright_red');
             $rebut_text = isset($riw['rebut']) && $riw['rebut'] ? colorText(" (Rebut)", 'bright_yellow') : "";
-            echo "$status_icon " . colorText($riw['tim'], 'bright_cyan') . ": " . colorText($riw['sesuatu'], 'white') . " (" . $status_text . "$rebut_text)\n";
+            $ronde_cepat_text = isset($riw['ronde_cepat']) && $riw['ronde_cepat'] ? colorText(" (Ronde Cepat)", 'bright_magenta') : "";
+            echo "$status_icon " . colorText($riw['tim'], 'bright_cyan') . ": " . colorText($riw['sesuatu'], 'white') . " (" . $status_text . "$rebut_text$ronde_cepat_text)\n";
         }
         echo colorText(str_repeat("─", 45), 'cyan') . "\n";
     }
@@ -691,6 +804,7 @@ while (true) {
     echo menuItem("3", "Mulai Bermain", "🎯") . "\n";
     echo menuItem("4", "Cek Skor Akhir", "🏆") . "\n";
     if (!empty($state['tim'])) {
+        echo menuItem("5", "Ronde Cepat", "⚡️") . "\n";
         echo menuItem("8", "Skor Sementara", "📊") . "\n";
     }
     echo menuItem("9", "Status Item", "📝") . "\n";
@@ -702,6 +816,7 @@ while (true) {
     elseif ($menu == 2) menuTentukanTim($state);
     elseif ($menu == 3) menuMulaiBermain($state, $daftar_sesuatu);
     elseif ($menu == 4) menuSkorAkhir($state);
+    elseif ($menu == 5 && !empty($state['tim'])) menuLightningRound($state, $daftar_sesuatu);
     elseif ($menu == 8 && !empty($state['tim'])) menuSkorSementara($state);
     elseif ($menu == 9) menuStatusItem($state, $daftar_sesuatu);
     elseif ($menu == 0) break;
